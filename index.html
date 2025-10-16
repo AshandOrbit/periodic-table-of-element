@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Periodic Table of Element</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1a1a1a;
+            color: #fff;
+            font-family: 'Arial', sans-serif;
+            padding: 20px;
+            overflow-x: auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 48px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .header h1 .highlight {
+            color: #d4ff00;
+        }
+
+        .table-container {
+            display: inline-block;
+            min-width: 100%;
+        }
+
+        .periodic-table {
+            display: grid;
+            grid-template-columns: repeat(19, 70px);
+            grid-gap: 4px;
+            margin: 0 auto;
+            width: fit-content;
+        }
+
+        .element {
+            width: 70px;
+            height: 70px;
+            border: 2px solid;
+            border-radius: 4px;
+            padding: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .element:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px currentColor;
+            z-index: 10;
+        }
+
+        .element.noble {
+            border-color: #d4ff00;
+            background: rgba(212, 255, 0, 0.1);
+        }
+
+        .element.claimed {
+            border-color: #d4ff00;
+            background: rgba(212, 255, 0, 0.15);
+        }
+
+        .element.reactive { border-color: #4ade80; }
+        .element.alkali { border-color: #a855f7; }
+        .element.alkaline { border-color: #8b5cf6; }
+        .element.transition { border-color: #ef4444; }
+        .element.post-transition { border-color: #22d3ee; }
+        .element.metalloid { border-color: #64748b; }
+        .element.nonmetal { border-color: #4ade80; }
+        .element.noble-gas { border-color: #fb923c; }
+        .element.lanthanide { border-color: #3b82f6; }
+        .element.actinide { border-color: #d946ef; }
+
+        .atomic-number {
+            font-size: 9px;
+            position: absolute;
+            top: 2px;
+            left: 4px;
+        }
+
+        .symbol {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 8px 0 2px 0;
+        }
+
+        .name {
+            font-size: 8px;
+            text-align: center;
+        }
+
+        .empty {
+            border: none;
+            background: transparent;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #2a2a2a;
+            border: 2px solid #d4ff00;
+            border-radius: 8px;
+            padding: 40px;
+            max-width: 600px;
+            position: relative;
+            box-shadow: 0 0 40px rgba(212, 255, 0, 0.3);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            font-size: 32px;
+            cursor: pointer;
+            color: #d4ff00;
+        }
+
+        .modal h2 {
+            color: #d4ff00;
+            margin-bottom: 20px;
+            font-size: 32px;
+        }
+
+        .modal h3 {
+            color: #fff;
+            margin-bottom: 10px;
+        }
+
+        .modal p {
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .legend {
+            margin-top: 40px;
+            text-align: center;
+        }
+
+        .legend-items {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .legend-box {
+            width: 30px;
+            height: 30px;
+            border: 2px solid;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>The Periodic Table of <span class="highlight">Element</span></h1>
+    </div>
+
+    <div class="table-container">
+        <div class="periodic-table" id="periodicTable"></div>
+    </div>
+
+    <div class="legend">
+        <h3>Element Categories</h3>
+        <div class="legend-items">
+            <div class="legend-item">
+                <div class="legend-box" style="border-color: #d4ff00; background: rgba(212, 255, 0, 0.1);"></div>
+                <span>Element Products</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-box" style="border-color: #4ade80;"></div>
+                <span>Reactive Nonmetals</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-box" style="border-color: #ef4444;"></div>
+                <span>Transition Metals</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-box" style="border-color: #fb923c;"></div>
+                <span>Noble Gases</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeModal()">&times;</span>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
+    <script>
+        const elementProducts = [
+            { symbol: 'St', name: 'STRIA', number: 'E1', description: 'The Verification Element', story: 'STRIA verifies that what emerges from the Earth is ethical, transparent, and genuine. It replaces paperwork with digital verification, location intelligence, and privacy-preserving proofs—making sustainability measurable, not performative.' },
+            { symbol: 'Co', name: 'CORE', number: 'E2', description: 'The Permanence Element', story: 'CORE tokenizes minerals, metals, and commodities—both extracted and protected. By anchoring resources in blockchain permanence, CORE can prevent extraction where it would cause harm, or track it transparently where it serves communities.' },
+            { symbol: 'Of', name: 'OFFSET', number: 'E3', description: 'The Restoration Element', story: 'Value without balance corrodes. OFFSET restores it. Each carbon ton retired, each coral revived, each acre restored becomes a verified act of renewal—pairing extraction with restoration as requirement, not afterthought.' },
+            { symbol: 'Al', name: 'ALCHEMY', number: 'E4', description: 'The Transformation Element', story: 'Alchemy is where verified materials become meaningful objects—and where today\'s creations become tomorrow\'s heirlooms. Through partnerships with craftspeople and luxury brands, every creation carries its ethical story forward.' },
+            { symbol: 'At', name: 'ATLAS', number: 'E5', description: 'The Discovery Element', story: 'GOLD CREW ATLAS makes the invisible visible. Players navigate live maps of real Element mines, completing missions that mirror actual resource stewardship—proving that even in digital worlds, we remain connected to the Earth.' }
+        ];
+
+        const claimedElements = {
+            'He': {
+                name: 'Heirloom NFT',
+                description: 'Where Memory Becomes Permanent',
+                story: 'Heirloom NFT allows families to preserve, verify, and share the stories behind their most meaningful possessions. From wedding bands to inherited treasures, every object becomes a verified legacy that can be shared, protected, and remembered across generations. This is Element\'s first consumer product—launching the future of family memory.'
+            },
+            'Au': {
+                name: 'Gold Tracking',
+                description: 'From Mine to Market',
+                story: 'Gold (Au) represents Element\'s core mission: tracing precious metals from ethical extraction through the entire supply chain, ensuring conflict-free sourcing and transparent provenance for every gram.'
+            },
+            'Ag': {
+                name: 'Silver Partnership',
+                description: 'Jewelry & Industrial Use',
+                story: 'Silver tracking through Element ensures ethical sourcing for both luxury jewelry and industrial applications. From Peruvian mines to manufacturing, every ounce carries its verified story.'
+            },
+            'Li': {
+                name: 'Lithium Initiative',
+                description: 'Battery Supply Chain',
+                story: 'Element partners with South American lithium operations to track battery-grade materials from extraction through EV production, ensuring transparency in the green energy transition.'
+            },
+            'C': {
+                name: 'Carbon Credits',
+                description: 'Verified Offset Trading',
+                story: 'Carbon (C) represents Element\'s OFFSET marketplace—where every ton of CO2 retired is verified on-chain, creating transparent, traceable carbon credits that actually mean something.'
+            },
+            'Cu': {
+                name: 'Copper Network',
+                description: 'Infrastructure Materials',
+                story: 'Copper tracking for electrical infrastructure and renewable energy systems. Element verifies ethical mining practices and supply chain integrity for this essential conductor.'
+            },
+            'Pt': {
+                name: 'Platinum Collective',
+                description: 'Luxury & Catalytic Converters',
+                story: 'Platinum sourcing from certified mines, tracked through both luxury goods manufacturing and automotive catalytic converter production—dual-use transparency.'
+            }
+        };
+
+        const periodicData = [
+            // Row 1
+            { symbol: 'H', name: 'Hydrogen', number: 1, category: 'reactive', row: 1, col: 2 },
+            { symbol: 'He', name: 'Helium', number: 2, category: 'noble-gas', row: 1, col: 19, claimed: true },
+            
+            // Row 2
+            { symbol: 'Li', name: 'Lithium', number: 3, category: 'alkali', row: 2, col: 2, claimed: true },
+            { symbol: 'Be', name: 'Beryllium', number: 4, category: 'alkaline', row: 2, col: 3 },
+            { symbol: 'B', name: 'Boron', number: 5, category: 'metalloid', row: 2, col: 14 },
+            { symbol: 'C', name: 'Carbon', number: 6, category: 'reactive', row: 2, col: 15, claimed: true },
+            { symbol: 'N', name: 'Nitrogen', number: 7, category: 'reactive', row: 2, col: 16 },
+            { symbol: 'O', name: 'Oxygen', number: 8, category: 'reactive', row: 2, col: 17 },
+            { symbol: 'F', name: 'Fluorine', number: 9, category: 'reactive', row: 2, col: 18 },
+            { symbol: 'Ne', name: 'Neon', number: 10, category: 'noble-gas', row: 2, col: 19 },
+            
+            // Row 3
+            { symbol: 'Na', name: 'Sodium', number: 11, category: 'alkali', row: 3, col: 2 },
+            { symbol: 'Mg', name: 'Magnesium', number: 12, category: 'alkaline', row: 3, col: 3 },
+            { symbol: 'Al', name: 'Aluminum', number: 13, category: 'post-transition', row: 3, col: 14 },
+            { symbol: 'Si', name: 'Silicon', number: 14, category: 'metalloid', row: 3, col: 15 },
+            { symbol: 'P', name: 'Phosphorus', number: 15, category: 'reactive', row: 3, col: 16 },
+            { symbol: 'S', name: 'Sulfur', number: 16, category: 'reactive', row: 3, col: 17 },
+            { symbol: 'Cl', name: 'Chlorine', number: 17, category: 'reactive', row: 3, col: 18 },
+            { symbol: 'Ar', name: 'Argon', number: 18, category: 'noble-gas', row: 3, col: 19 },
+            
+            // Row 4
+            { symbol: 'K', name: 'Potassium', number: 19, category: 'alkali', row: 4, col: 2 },
+            { symbol: 'Ca', name: 'Calcium', number: 20, category: 'alkaline', row: 4, col: 3 },
+            { symbol: 'Sc', name: 'Scandium', number: 21, category: 'transition', row: 4, col: 4 },
+            { symbol: 'Ti', name: 'Titanium', number: 22, category: 'transition', row: 4, col: 5 },
+            { symbol: 'V', name: 'Vanadium', number: 23, category: 'transition', row: 4, col: 6 },
+            { symbol: 'Cr', name: 'Chromium', number: 24, category: 'transition', row: 4, col: 7 },
+            { symbol: 'Mn', name: 'Manganese', number: 25, category: 'transition', row: 4, col: 8 },
+            { symbol: 'Fe', name: 'Iron', number: 26, category: 'transition', row: 4, col: 9 },
+            { symbol: 'Co', name: 'Cobalt', number: 27, category: 'transition', row: 4, col: 10 },
+            { symbol: 'Ni', name: 'Nickel', number: 28, category: 'transition', row: 4, col: 11 },
+            { symbol: 'Cu', name: 'Copper', number: 29, category: 'transition', row: 4, col: 12, claimed: true },
+            { symbol: 'Zn', name: 'Zinc', number: 30, category: 'transition', row: 4, col: 13 },
+            { symbol: 'Ga', name: 'Gallium', number: 31, category: 'post-transition', row: 4, col: 14 },
+            { symbol: 'Ge', name: 'Germanium', number: 32, category: 'metalloid', row: 4, col: 15 },
+            { symbol: 'As', name: 'Arsenic', number: 33, category: 'metalloid', row: 4, col: 16 },
+            { symbol: 'Se', name: 'Selenium', number: 34, category: 'reactive', row: 4, col: 17 },
+            { symbol: 'Br', name: 'Bromine', number: 35, category: 'reactive', row: 4, col: 18 },
+            { symbol: 'Kr', name: 'Krypton', number: 36, category: 'noble-gas', row: 4, col: 19 },
+            
+            // Row 5
+            { symbol: 'Rb', name: 'Rubidium', number: 37, category: 'alkali', row: 5, col: 2 },
+            { symbol: 'Sr', name: 'Strontium', number: 38, category: 'alkaline', row: 5, col: 3 },
+            { symbol: 'Y', name: 'Yttrium', number: 39, category: 'transition', row: 5, col: 4 },
+            { symbol: 'Zr', name: 'Zirconium', number: 40, category: 'transition', row: 5, col: 5 },
+            { symbol: 'Nb', name: 'Niobium', number: 41, category: 'transition', row: 5, col: 6 },
+            { symbol: 'Mo', name: 'Molybdenum', number: 42, category: 'transition', row: 5, col: 7 },
+            { symbol: 'Tc', name: 'Technetium', number: 43, category: 'transition', row: 5, col: 8 },
+            { symbol: 'Ru', name: 'Ruthenium', number: 44, category: 'transition', row: 5, col: 9 },
+            { symbol: 'Rh', name: 'Rhodium', number: 45, category: 'transition', row: 5, col: 10 },
+            { symbol: 'Pd', name: 'Palladium', number: 46, category: 'transition', row: 5, col: 11 },
+            { symbol: 'Ag', name: 'Silver', number: 47, category: 'transition', row: 5, col: 12, claimed: true },
+            { symbol: 'Cd', name: 'Cadmium', number: 48, category: 'transition', row: 5, col: 13 },
+            { symbol: 'In', name: 'Indium', number: 49, category: 'post-transition', row: 5, col: 14 },
+            { symbol: 'Sn', name: 'Tin', number: 50, category: 'post-transition', row: 5, col: 15 },
+            { symbol: 'Sb', name: 'Antimony', number: 51, category: 'metalloid', row: 5, col: 16 },
+            { symbol: 'Te', name: 'Tellurium', number: 52, category: 'metalloid', row: 5, col: 17 },
+            { symbol: 'I', name: 'Iodine', number: 53, category: 'reactive', row: 5, col: 18 },
+            { symbol: 'Xe', name: 'Xenon', number: 54, category: 'noble-gas', row: 5, col: 19 },
+            
+            // Row 6
+            { symbol: 'Cs', name: 'Cesium', number: 55, category: 'alkali', row: 6, col: 2 },
+            { symbol: 'Ba', name: 'Barium', number: 56, category: 'alkaline', row: 6, col: 3 },
+            { symbol: 'Hf', name: 'Hafnium', number: 72, category: 'transition', row: 6, col: 4 },
+            { symbol: 'Ta', name: 'Tantalum', number: 73, category: 'transition', row: 6, col: 5 },
+            { symbol: 'W', name: 'Tungsten', number: 74, category: 'transition', row: 6, col: 6 },
+            { symbol: 'Re', name: 'Rhenium', number: 75, category: 'transition', row: 6, col: 7 },
+            { symbol: 'Os', name: 'Osmium', number: 76, category: 'transition', row: 6, col: 8 },
+            { symbol: 'Ir', name: 'Iridium', number: 77, category: 'transition', row: 6, col: 9 },
+            { symbol: 'Pt', name: 'Platinum', number: 78, category: 'transition', row: 6, col: 10, claimed: true },
+            { symbol: 'Au', name: 'Gold', number: 79, category: 'transition', row: 6, col: 11, claimed: true },
+            { symbol: 'Hg', name: 'Mercury', number: 80, category: 'transition', row: 6, col: 13 },
+            { symbol: 'Tl', name: 'Thallium', number: 81, category: 'post-transition', row: 6, col: 14 },
+            { symbol: 'Pb', name: 'Lead', number: 82, category: 'post-transition', row: 6, col: 15 },
+            { symbol: 'Bi', name: 'Bismuth', number: 83, category: 'post-transition', row: 6, col: 16 },
+            { symbol: 'Po', name: 'Polonium', number: 84, category: 'metalloid', row: 6, col: 17 },
+            { symbol: 'At', name: 'Astatine', number: 85, category: 'reactive', row: 6, col: 18 },
+            { symbol: 'Rn', name: 'Radon', number: 86, category: 'noble-gas', row: 6, col: 19 },
+            
+            // Row 7
+            { symbol: 'Fr', name: 'Francium', number: 87, category: 'alkali', row: 7, col: 2 },
+            { symbol: 'Ra', name: 'Radium', number: 88, category: 'alkaline', row: 7, col: 3 },
+            { symbol: 'Rf', name: 'Rutherfordium', number: 104, category: 'transition', row: 7, col: 4 },
+            { symbol: 'Db', name: 'Dubnium', number: 105, category: 'transition', row: 7, col: 5 },
+            { symbol: 'Sg', name: 'Seaborgium', number: 106, category: 'transition', row: 7, col: 6 },
+            { symbol: 'Bh', name: 'Bohrium', number: 107, category: 'transition', row: 7, col: 7 },
+            { symbol: 'Hs', name: 'Hassium', number: 108, category: 'transition', row: 7, col: 8 },
+            { symbol: 'Mt', name: 'Meitnerium', number: 109, category: 'transition', row: 7, col: 9 },
+            { symbol: 'Ds', name: 'Darmstadtium', number: 110, category: 'transition', row: 7, col: 10 },
+            { symbol: 'Rg', name: 'Roentgenium', number: 111, category: 'transition', row: 7, col: 11 },
+            { symbol: 'Cn', name: 'Copernicium', number: 112, category: 'transition', row: 7, col: 12 },
+            { symbol: 'Nh', name: 'Nihonium', number: 113, category: 'post-transition', row: 7, col: 14 },
+            { symbol: 'Fl', name: 'Flerovium', number: 114, category: 'post-transition', row: 7, col: 15 },
+            { symbol: 'Mc', name: 'Moscovium', number: 115, category: 'post-transition', row: 7, col: 16 },
+            { symbol: 'Lv', name: 'Livermorium', number: 116, category: 'post-transition', row: 7, col: 17 },
+            { symbol: 'Ts', name: 'Tennessine', number: 117, category: 'reactive', row: 7, col: 18 },
+            { symbol: 'Og', name: 'Oganesson', number: 118, category: 'noble-gas', row: 7, col: 19 },
+            
+            // Lanthanides (Row 9)
+            { symbol: 'La', name: 'Lanthanum', number: 57, category: 'lanthanide', row: 9, col: 4 },
+            { symbol: 'Ce', name: 'Cerium', number: 58, category: 'lanthanide', row: 9, col: 5 },
+            { symbol: 'Pr', name: 'Praseodymium', number: 59, category: 'lanthanide', row: 9, col: 6 },
+            { symbol: 'Nd', name: 'Neodymium', number: 60, category: 'lanthanide', row: 9, col: 7 },
+            { symbol: 'Pm', name: 'Promethium', number: 61, category: 'lanthanide', row: 9, col: 8 },
+            { symbol: 'Sm', name: 'Samarium', number: 62, category: 'lanthanide', row: 9, col: 9 },
+            { symbol: 'Eu', name: 'Europium', number: 63, category: 'lanthanide', row: 9, col: 10 },
+            { symbol: 'Gd', name: 'Gadolinium', number: 64, category: 'lanthanide', row: 9, col: 11 },
+            { symbol: 'Tb', name: 'Terbium', number: 65, category: 'lanthanide', row: 9, col: 12 },
+            { symbol: 'Dy', name: 'Dysprosium', number: 66, category: 'lanthanide', row: 9, col: 13 },
+            { symbol: 'Ho', name: 'Holmium', number: 67, category: 'lanthanide', row: 9, col: 14 },
+            { symbol: 'Er', name: 'Erbium', number: 68, category: 'lanthanide', row: 9, col: 15 },
+            { symbol: 'Tm', name: 'Thulium', number: 69, category: 'lanthanide', row: 9, col: 16 },
+            { symbol: 'Yb', name: 'Ytterbium', number: 70, category: 'lanthanide', row: 9, col: 17 },
+            { symbol: 'Lu', name: 'Lutetium', number: 71, category: 'lanthanide', row: 9, col: 18 },
+            
+            // Actinides (Row 10)
+            { symbol: 'Ac', name: 'Actinium', number: 89, category: 'actinide', row: 10, col: 4 },
+            { symbol: 'Th', name: 'Thorium', number: 90, category: 'actinide', row: 10, col: 5 },
+            { symbol: 'Pa', name: 'Protactinium', number: 91, category: 'actinide', row: 10, col: 6 },
+            { symbol: 'U', name: 'Uranium', number: 92, category: 'actinide', row: 10, col: 7 },
+            { symbol: 'Np', name: 'Neptunium', number: 93, category: 'actinide', row: 10, col: 8 },
+            { symbol: 'Pu', name: 'Plutonium', number: 94, category: 'actinide', row: 10, col: 9 },
+            { symbol: 'Am', name: 'Americium', number: 95, category: 'actinide', row: 10, col: 10 },
+            { symbol: 'Cm', name: 'Curium', number: 96, category: 'actinide', row: 10, col: 11 },
+            { symbol: 'Bk', name: 'Berkelium', number: 97, category: 'actinide', row: 10, col: 12 },
+            { symbol: 'Cf', name: 'Californium', number: 98, category: 'actinide', row: 10, col: 13 },
+            { symbol: 'Es', name: 'Einsteinium', number: 99, category: 'actinide', row: 10, col: 14 },
+            { symbol: 'Fm', name: 'Fermium', number: 100, category: 'actinide', row: 10, col: 15 },
+            { symbol: 'Md', name: 'Mendelevium', number: 101, category: 'actinide', row: 10, col: 16 },
+            { symbol: 'No', name: 'Nobelium', number: 102, category: 'actinide', row: 10, col: 17 },
+            { symbol: 'Lr', name: 'Lawrencium', number: 103, category: 'actinide', row: 10, col: 18 }
+        ];
+
+        function createPeriodicTable() {
+            const table = document.getElementById('periodicTable');
+            const maxCols = 19;
+            const maxRows = 10;
+            
+            for (let row = 1; row <= maxRows; row++) {
+                for (let col = 1; col <= maxCols; col++) {
+                    const div = document.createElement('div');
+                    
+                    if (col === 1 && row >= 2 && row <= 6) {
+                        const product = elementProducts[row - 2];
+                        div.className = 'element noble';
+                        div.innerHTML = `
+                            <div class="atomic-number">${product.number}</div>
+                            <div class="symbol">${product.symbol}</div>
+                            <div class="name">${product.name}</div>
+                        `;
+                        div.onclick = () => showModal(product.name, product.description, product.story);
+                    } else {
+                        const element = periodicData.find(e => e.row === row && e.col === col);
+                        if (element) {
+                            const isClaimed = claimedElements[element.symbol];
+                            div.className = `element ${element.category}${isClaimed ? ' claimed' : ''}`;
+                            div.innerHTML = `
+                                <div class="atomic-number">${element.number}</div>
+                                <div class="symbol">${element.symbol}</div>
+                                <div class="name">${isClaimed ? claimedElements[element.symbol].name : element.name}</div>
+                            `;
+                            if (isClaimed) {
+                                div.onclick = () => showModal(
+                                    claimedElements[element.symbol].name,
+                                    claimedElements[element.symbol].description,
+                                    claimedElements[element.symbol].story
+                                );
+                            } else {
+                                div.onclick = () => showModal(element.name, `Element ${element.number}`, `${element.name} is available to be claimed by Element United as your network grows.`);
+                            }
+                        } else {
+                            div.className = 'empty';
+                        }
+                    }
+                    
+                    table.appendChild(div);
+                }
+            }
+        }
+
+        function showModal(title, subtitle, content) {
+            const modal = document.getElementById('modal');
+            const modalBody = document.getElementById('modalBody');
+            modalBody.innerHTML = `
+                <h2>${title}</h2>
+                <h3>${subtitle}</h3>
+                <p>${content}</p>
+            `;
+            modal.classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('modal').classList.remove('active');
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeModal();
+        });
+
+        createPeriodicTable();
+    </script>
+</body>
+</html>
