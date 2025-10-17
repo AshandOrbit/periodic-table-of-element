@@ -124,6 +124,7 @@
             z-index: 1000;
             justify-content: center;
             align-items: center;
+            cursor: pointer;
         }
 
         .modal.active {
@@ -138,6 +139,7 @@
             max-width: 600px;
             position: relative;
             box-shadow: 0 0 40px rgba(212, 255, 0, 0.3);
+            cursor: default;
         }
 
         .modal-close {
@@ -223,8 +225,8 @@
         </div>
     </div>
 
-    <div class="modal" id="modal">
-        <div class="modal-content">
+    <div class="modal" id="modal" onclick="handleModalClick(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
             <span class="modal-close" onclick="closeModal()">&times;</span>
             <div id="modalBody"></div>
         </div>
@@ -476,6 +478,14 @@
         function closeModal() {
             document.getElementById('modal').classList.remove('active');
         }
+
+        // Close modal when clicking outside
+        document.addEventListener('click', (e) => {
+            const modal = document.getElementById('modal');
+            if (e.target === modal) {
+                closeModal();
+            }
+        });
 
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') closeModal();
